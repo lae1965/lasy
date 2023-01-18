@@ -1,0 +1,729 @@
+#ifndef DEF_SLCHSC
+#define DEF_SLCHSC 1
+
+#define KBNDEF (0xFF)
+
+/*  The key names that follow are made of components: Example:      */
+/*                                                                  */
+/*  The character code for shift-up-arrow is:                       */
+/*     KB_C_S_UP                                                    */
+/*     ³  ³ ³  ³                                                    */
+/*     ³  ³ ³  ÀÄÄÄÄÄÄÄÄ Key name.                                  */
+/*     ³  ³ ÀÄÄÄÄÄÄÄÄÄÄÄ S means shifted; can be (N for normal, S   */
+/*     ³  ³              for shifted, C for control, or A for alt.  */
+/*     ³  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄ C signifies character code.  Can also be   */
+/*     ³                 S for scan code.                           */
+/*     ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ This is a keyboard definition.             */
+/*                                                                  */
+
+#define KB_C_N_F1   0           /* Character code for normal F1 key */
+#define KB_S_N_F1   59          /* Scan      code for normal F1 key */
+#define KB_C_S_F1   0           /* Character code for shift  F1 key */
+#define KB_S_S_F1   84          /* Scan      code for shift  F1 key */
+#define KB_C_C_F1   0           /* Character code for ctrl   F1 key */
+#define KB_S_C_F1   94          /* Scan      code for ctrl   F1 key */
+#define KB_C_A_F1   0           /* Character code for alt    F1 key */
+#define KB_S_A_F1   104         /* Scan      code for alt    F1 key */
+
+#define KB_C_N_F2   0
+#define KB_S_N_F2   60
+#define KB_C_S_F2   0
+#define KB_S_S_F2   85
+#define KB_C_C_F2   0
+#define KB_S_C_F2   95
+#define KB_C_A_F2   0
+#define KB_S_A_F2   105
+
+#define KB_C_N_F3   0
+#define KB_S_N_F3   61
+#define KB_C_S_F3   0
+#define KB_S_S_F3   86
+#define KB_C_C_F3   0
+#define KB_S_C_F3   96
+#define KB_C_A_F3   0
+#define KB_S_A_F3   106
+
+#define KB_C_N_F4   0
+#define KB_S_N_F4   62
+#define KB_C_S_F4   0
+#define KB_S_S_F4   87
+#define KB_C_C_F4   0
+#define KB_S_C_F4   97
+#define KB_C_A_F4   0
+#define KB_S_A_F4   107
+
+#define KB_C_N_F5   0
+#define KB_S_N_F5   63
+#define KB_C_S_F5   0
+#define KB_S_S_F5   88
+#define KB_C_C_F5   0
+#define KB_S_C_F5   98
+#define KB_C_A_F5   0
+#define KB_S_A_F5   108
+
+#define KB_C_N_F6   0
+#define KB_S_N_F6   64
+#define KB_C_S_F6   0
+#define KB_S_S_F6   89
+#define KB_C_C_F6   0
+#define KB_S_C_F6   99
+#define KB_C_A_F6   0
+#define KB_S_A_F6   109
+
+#define KB_C_N_F7   0
+#define KB_S_N_F7   65
+#define KB_C_S_F7   0
+#define KB_S_S_F7   90
+#define KB_C_C_F7   0
+#define KB_S_C_F7   100
+#define KB_C_A_F7   0
+#define KB_S_A_F7   110
+
+#define KB_C_N_F8   0
+#define KB_S_N_F8   66
+#define KB_C_S_F8   0
+#define KB_S_S_F8   91
+#define KB_C_C_F8   0
+#define KB_S_C_F8   101
+#define KB_C_A_F8   0
+#define KB_S_A_F8   111
+
+#define KB_C_N_F9   0
+#define KB_S_N_F9   67
+#define KB_C_S_F9   0
+#define KB_S_S_F9   92
+#define KB_C_C_F9   0
+#define KB_S_C_F9   102
+#define KB_C_A_F9   0
+#define KB_S_A_F9   112
+
+#define KB_C_N_F10  0
+#define KB_S_N_F10  68
+#define KB_C_S_F10  0
+#define KB_S_S_F10  93
+#define KB_C_C_F10  0
+#define KB_S_C_F10  103
+#define KB_C_A_F10  0
+#define KB_S_A_F10  113
+
+#define KB_C_N_F11  0
+#define KB_S_N_F11  133
+#define KB_C_S_F11  0
+#define KB_S_S_F11  135
+#define KB_C_C_F11  0
+#define KB_S_C_F11  137
+#define KB_C_A_F11  0
+#define KB_S_A_F11  139
+
+#define KB_C_N_F12  0
+#define KB_S_N_F12  134
+#define KB_C_S_F12  0
+#define KB_S_S_F12  136
+#define KB_C_C_F12  0
+#define KB_S_C_F12  138
+#define KB_C_A_F12  0
+#define KB_S_A_F12  140
+
+#define KB_C_N_PADSLASH 47
+#define KB_S_N_PADSLASH 95
+#define KB_C_S_PADSLASH 47
+#define KB_S_S_PADSLASH 95
+#define KB_C_C_PADSLASH 0
+#define KB_S_C_PADSLASH 149
+#define KB_C_A_PADSLASH 0
+#define KB_S_A_PADSLASH 164
+
+#define KB_C_N_HOME     0
+#define KB_S_N_HOME     71
+#define KB_C_S_HOME     55
+#define KB_S_S_HOME     71
+#define KB_C_C_HOME     0
+#define KB_S_C_HOME     119
+#define KB_C_A_HOME     0
+#define KB_S_A_HOME     151
+
+#define KB_C_N_UP       0
+#define KB_S_N_UP       72
+#define KB_C_S_UP       56
+#define KB_S_S_UP       72
+#define KB_C_C_UP       0
+#define KB_S_C_UP       141
+#define KB_C_A_UP       0
+#define KB_S_A_UP       152
+
+#define KB_C_N_PGUP     0
+#define KB_S_N_PGUP     73
+#define KB_C_S_PGUP     57
+#define KB_S_S_PGUP     73
+#define KB_C_C_PGUP     0
+#define KB_S_C_PGUP     132
+#define KB_C_A_PGUP     0
+#define KB_S_A_PGUP     153
+
+#define KB_C_N_LEFT     0
+#define KB_S_N_LEFT     75
+#define KB_C_S_LEFT     52
+#define KB_S_S_LEFT     75
+#define KB_C_C_LEFT     0
+#define KB_S_C_LEFT     115
+#define KB_C_A_LEFT     0
+#define KB_S_A_LEFT     155
+
+#define KB_C_N_PAD5     KBNDEF
+#define KB_S_N_PAD5     KBNDEF
+#define KB_C_S_PAD5     53
+#define KB_S_S_PAD5     76
+#define KB_C_C_PAD5     0
+#define KB_S_C_PAD5     143
+#define KB_C_A_PAD5     KBNDEF
+#define KB_S_A_PAD5     KBNDEF
+
+#define KB_C_N_RIGHT    0
+#define KB_S_N_RIGHT    77
+#define KB_C_S_RIGHT    54
+#define KB_S_S_RIGHT    77
+#define KB_C_C_RIGHT    0
+#define KB_S_C_RIGHT    116
+#define KB_C_A_RIGHT    0
+#define KB_S_A_RIGHT    157
+
+#define KB_C_N_END      0
+#define KB_S_N_END      79
+#define KB_C_S_END      49
+#define KB_S_S_END      79
+#define KB_C_C_END      0
+#define KB_S_C_END      117
+#define KB_C_A_END      0
+#define KB_S_A_END      159
+
+#define KB_C_N_DOWN     0
+#define KB_S_N_DOWN     80
+#define KB_C_S_DOWN     50
+#define KB_S_S_DOWN     80
+#define KB_C_C_DOWN     0
+#define KB_S_C_DOWN     145
+#define KB_C_A_DOWN     0
+#define KB_S_A_DOWN     160
+
+#define KB_C_N_PGDN     0
+#define KB_S_N_PGDN     81
+#define KB_C_S_PGDN     51
+#define KB_S_S_PGDN     81
+#define KB_C_C_PGDN     0
+#define KB_S_C_PGDN     118
+#define KB_C_A_PGDN     0
+#define KB_S_A_PGDN     161
+
+#define KB_C_N_INS      0
+#define KB_S_N_INS      82
+#define KB_C_S_INS      48
+#define KB_S_S_INS      82
+#define KB_C_C_INS      0
+#define KB_S_C_INS      146
+#define KB_C_A_INS      0
+#define KB_S_A_INS      162
+
+#define KB_C_N_DEL      0
+#define KB_S_N_DEL      83
+#define KB_C_S_DEL      46
+#define KB_S_S_DEL      83
+#define KB_C_C_DEL      0
+#define KB_S_C_DEL      147
+#define KB_C_A_DEL      0
+#define KB_S_A_DEL      163
+
+#define KB_C_N_BACKSPACE 8
+#define KB_S_N_BACKSPACE 14
+#define KB_C_S_BACKSPACE KBNDEF
+#define KB_S_S_BACKSPACE KBNDEF
+#define KB_C_C_BACKSPACE 127
+#define KB_S_C_BACKSPACE 14
+#define KB_C_A_BACKSPACE 0
+#define KB_S_A_BACKSPACE 14
+
+#define KB_C_N_TAB      9
+#define KB_S_N_TAB      15
+#define KB_C_S_TAB      0
+#define KB_S_S_TAB      15
+#define KB_C_C_TAB      0
+#define KB_S_C_TAB      148
+#define KB_C_A_TAB      0
+#define KB_S_A_TAB      165
+
+#define KB_C_N_ENTER    13
+#define KB_S_N_ENTER    28
+#define KB_C_S_ENTER    13
+#define KB_S_S_ENTER    28
+#define KB_C_C_ENTER    10
+#define KB_S_C_ENTER    28
+#define KB_C_A_ENTER    0
+#define KB_S_A_ENTER    166
+
+#define KB_C_N_ESC      27
+#define KB_S_N_ESC      1
+#define KB_C_S_ESC      27
+#define KB_S_S_ESC      1
+#define KB_C_C_ESC      27
+#define KB_S_C_ESC      1
+#define KB_C_A_ESC      0
+#define KB_S_A_ESC      1
+
+#define KB_C_N_SPACE    32
+#define KB_S_N_SPACE    57
+#define KB_C_S_SPACE    KBNDEF
+#define KB_S_S_SPACE    KBNDEF
+#define KB_C_C_SPACE    KBNDEF
+#define KB_S_C_SPACE    KBNDEF
+#define KB_C_A_SPACE    KBNDEF
+#define KB_S_A_SPACE    KBNDEF
+
+#define KB_C_N_QUOTE    39
+#define KB_S_N_QUOTE    40
+#define KB_C_S_QUOTE    34
+#define KB_S_S_QUOTE    40
+#define KB_C_C_QUOTE    KBNDEF
+#define KB_S_C_QUOTE    KBNDEF
+#define KB_C_A_QUOTE    KBNDEF
+#define KB_S_A_QUOTE    KBNDEF
+
+#define KB_C_N_PRTSC    42
+#define KB_S_N_PRTSC    55
+#define KB_C_S_PRTSC    0
+#define KB_S_S_PRTSC    114
+#define KB_C_C_PRTSC    0
+#define KB_S_C_PRTSC    150
+#define KB_C_A_PRTSC    0
+#define KB_S_A_PRTSC    55
+
+#define KB_C_N_PADPLUS  43
+#define KB_S_N_PADPLUS  78
+#define KB_C_S_PADPLUS  KBNDEF
+#define KB_S_S_PADPLUS  KBNDEF
+#define KB_C_C_PADPLUS  0
+#define KB_S_C_PADPLUS  144
+#define KB_C_A_PADPLUS  0
+#define KB_S_A_PADPLUS  78
+
+#define KB_C_N_COMMA    44
+#define KB_S_N_COMMA    51
+#define KB_C_S_COMMA    60
+#define KB_S_S_COMMA    51
+#define KB_C_C_COMMA    KBNDEF
+#define KB_S_C_COMMA    KBNDEF
+#define KB_C_A_COMMA    0
+#define KB_S_A_COMMA    51
+
+#define KB_C_N_MINUS    45
+#define KB_S_N_MINUS    12
+#define KB_C_S_MINUS    95
+#define KB_S_S_MINUS    12
+#define KB_C_C_MINUS    31
+#define KB_S_C_MINUS    12
+#define KB_C_A_MINUS    0
+#define KB_S_A_MINUS    130
+
+#define KB_C_N_PADMINUS 45
+#define KB_S_N_PADMINUS 74
+#define KB_C_S_PADMINUS KBNDEF
+#define KB_S_S_PADMINUS KBNDEF
+#define KB_C_C_PADMINUS 0
+#define KB_S_C_PADMINUS 142
+#define KB_C_A_PADMINUS 0
+#define KB_S_A_PADMINUS 74
+
+#define KB_C_N_PERIOD   46
+#define KB_S_N_PERIOD   52
+#define KB_C_S_PERIOD   62
+#define KB_S_S_PERIOD   52
+#define KB_C_C_PERIOD   KBNDEF
+#define KB_S_C_PERIOD   KBNDEF
+#define KB_C_A_PERIOD   0
+#define KB_S_A_PERIOD   52
+
+#define KB_C_N_SLASH    47
+#define KB_S_N_SLASH    53
+#define KB_C_S_SLASH    63
+#define KB_S_S_SLASH    53
+#define KB_C_C_SLASH    KBNDEF
+#define KB_S_C_SLASH    KBNDEF
+#define KB_C_A_SLASH    0
+#define KB_S_A_SLASH    53
+
+#define KB_C_N_0        48
+#define KB_S_N_0        11
+#define KB_C_S_0        41
+#define KB_S_S_0        11
+#define KB_C_C_0        KBNDEF
+#define KB_S_C_0        KBNDEF
+#define KB_C_A_0        0
+#define KB_S_A_0        129
+
+#define KB_C_N_1        49
+#define KB_S_N_1        2
+#define KB_C_S_1        33
+#define KB_S_S_1        2
+#define KB_C_C_1        KBNDEF
+#define KB_S_C_1        KBNDEF
+#define KB_C_A_1        0
+#define KB_S_A_1        120
+
+#define KB_C_N_2        50
+#define KB_S_N_2        3
+#define KB_C_S_2        64
+#define KB_S_S_2        3
+#define KB_C_C_2        KBNDEF
+#define KB_S_C_2        KBNDEF
+#define KB_C_A_2        0
+#define KB_S_A_2        121
+
+#define KB_C_N_3        51
+#define KB_S_N_3        4
+#define KB_C_S_3        35
+#define KB_S_S_3        4
+#define KB_C_C_3        KBNDEF
+#define KB_S_C_3        KBNDEF
+#define KB_C_A_3        0
+#define KB_S_A_3        122
+
+#define KB_C_N_4        52
+#define KB_S_N_4        5
+#define KB_C_S_4        36
+#define KB_S_S_4        5
+#define KB_C_C_4        KBNDEF
+#define KB_S_C_4        KBNDEF
+#define KB_C_A_4        0
+#define KB_S_A_4        123
+
+#define KB_C_N_5        53
+#define KB_S_N_5        6
+#define KB_C_S_5        37
+#define KB_S_S_5        6
+#define KB_C_C_5        KBNDEF
+#define KB_S_C_5        KBNDEF
+#define KB_C_A_5        0
+#define KB_S_A_5        124
+
+#define KB_C_N_6        54
+#define KB_S_N_6        7
+#define KB_C_S_6        94
+#define KB_S_S_6        7
+#define KB_C_C_6        KBNDEF
+#define KB_S_C_6        KBNDEF
+#define KB_C_A_6        0
+#define KB_S_A_6        125
+
+#define KB_C_N_7        55
+#define KB_S_N_7        8
+#define KB_C_S_7        38
+#define KB_S_S_7        8
+#define KB_C_C_7        KBNDEF
+#define KB_S_C_7        KBNDEF
+#define KB_C_A_7        0
+#define KB_S_A_7        126
+
+#define KB_C_N_8        56
+#define KB_S_N_8        9
+#define KB_C_S_8        42
+#define KB_S_S_8        9
+#define KB_C_C_8        KBNDEF
+#define KB_S_C_8        KBNDEF
+#define KB_C_A_8        0
+#define KB_S_A_8        127
+
+#define KB_C_N_9        57
+#define KB_S_N_9        10
+#define KB_C_S_9        40
+#define KB_S_S_9        10
+#define KB_C_C_9        KBNDEF
+#define KB_S_C_9        KBNDEF
+#define KB_C_A_9        0
+#define KB_S_A_9        128
+
+#define KB_C_N_SEMI     59
+#define KB_S_N_SEMI     39
+#define KB_C_S_SEMI     58
+#define KB_S_S_SEMI     39
+#define KB_C_C_SEMI     KBNDEF
+#define KB_S_C_SEMI     KBNDEF
+#define KB_C_A_SEMI     0
+#define KB_S_A_SEMI     39
+
+#define KB_C_N_EQUALS   61
+#define KB_S_N_EQUALS   13
+#define KB_C_S_EQUALS   43
+#define KB_S_S_EQUALS   13
+#define KB_C_C_EQUALS   KBNDEF
+#define KB_S_C_EQUALS   KBNDEF
+#define KB_C_A_EQUALS   0
+#define KB_S_A_EQUALS   131
+
+#define KB_C_N_A        97
+#define KB_S_N_A        30
+#define KB_C_S_A        65
+#define KB_S_S_A        30
+#define KB_C_C_A        1
+#define KB_S_C_A        30
+#define KB_C_A_A        0
+#define KB_S_A_A        30
+
+#define KB_C_N_B        98
+#define KB_S_N_B        48
+#define KB_C_S_B        66
+#define KB_S_S_B        48
+#define KB_C_C_B        2
+#define KB_S_C_B        48
+#define KB_C_A_B        0
+#define KB_S_A_B        48
+
+#define KB_C_N_C        99
+#define KB_S_N_C        46
+#define KB_C_S_C        67
+#define KB_S_S_C        46
+#define KB_C_C_C        3
+#define KB_S_C_C        46
+#define KB_C_A_C        0
+#define KB_S_A_C        46
+
+#define KB_C_N_D        100
+#define KB_S_N_D        32
+#define KB_C_S_D        68
+#define KB_S_S_D        32
+#define KB_C_C_D        4
+#define KB_S_C_D        32
+#define KB_C_A_D        0
+#define KB_S_A_D        32
+
+#define KB_C_N_E        101
+#define KB_S_N_E        18
+#define KB_C_S_E        69
+#define KB_S_S_E        18
+#define KB_C_C_E        5
+#define KB_S_C_E        18
+#define KB_C_A_E        0
+#define KB_S_A_E        18
+
+#define KB_C_N_F        102
+#define KB_S_N_F        33
+#define KB_C_S_F        70
+#define KB_S_S_F        33
+#define KB_C_C_F        6
+#define KB_S_C_F        33
+#define KB_C_A_F        0
+#define KB_S_A_F        33
+
+#define KB_C_N_G        103
+#define KB_S_N_G        34
+#define KB_C_S_G        71
+#define KB_S_S_G        34
+#define KB_C_C_G        7
+#define KB_S_C_G        34
+#define KB_C_A_G        0
+#define KB_S_A_G        34
+
+#define KB_C_N_H        104
+#define KB_S_N_H        35
+#define KB_C_S_H        72
+#define KB_S_S_H        35
+#define KB_C_C_H        8
+#define KB_S_C_H        35
+#define KB_C_A_H        0
+#define KB_S_A_H        35
+
+#define KB_C_N_I        105
+#define KB_S_N_I        23
+#define KB_C_S_I        73
+#define KB_S_S_I        23
+#define KB_C_C_I        9
+#define KB_S_C_I        23
+#define KB_C_A_I        0
+#define KB_S_A_I        23
+
+#define KB_C_N_J        106
+#define KB_S_N_J        36
+#define KB_C_S_J        74
+#define KB_S_S_J        36
+#define KB_C_C_J        10
+#define KB_S_C_J        36
+#define KB_C_A_J        0
+#define KB_S_A_J        36
+
+#define KB_C_N_K        107
+#define KB_S_N_K        37
+#define KB_C_S_K        75
+#define KB_S_S_K        37
+#define KB_C_C_K        11
+#define KB_S_C_K        37
+#define KB_C_A_K        0
+#define KB_S_A_K        37
+
+#define KB_C_N_L        108
+#define KB_S_N_L        38
+#define KB_C_S_L        76
+#define KB_S_S_L        38
+#define KB_C_C_L        12
+#define KB_S_C_L        38
+#define KB_C_A_L        0
+#define KB_S_A_L        38
+
+#define KB_C_N_M        109
+#define KB_S_N_M        50
+#define KB_C_S_M        77
+#define KB_S_S_M        50
+#define KB_C_C_M        13
+#define KB_S_C_M        50
+#define KB_C_A_M        0
+#define KB_S_A_M        50
+
+#define KB_C_N_N        110
+#define KB_S_N_N        49
+#define KB_C_S_N        78
+#define KB_S_S_N        49
+#define KB_C_C_N        14
+#define KB_S_C_N        49
+#define KB_C_A_N        0
+#define KB_S_A_N        49
+
+#define KB_C_N_O        111
+#define KB_S_N_O        24
+#define KB_C_S_O        79
+#define KB_S_S_O        24
+#define KB_C_C_O        15
+#define KB_S_C_O        24
+#define KB_C_A_O        0
+#define KB_S_A_O        24
+
+#define KB_C_N_P        112
+#define KB_S_N_P        25
+#define KB_C_S_P        80
+#define KB_S_S_P        25
+#define KB_C_C_P        16
+#define KB_S_C_P        25
+#define KB_C_A_P        0
+#define KB_S_A_P        25
+
+#define KB_C_N_Q        113
+#define KB_S_N_Q        16
+#define KB_C_S_Q        81
+#define KB_S_S_Q        16
+#define KB_C_C_Q        17
+#define KB_S_C_Q        16
+#define KB_C_A_Q        0
+#define KB_S_A_Q        16
+
+#define KB_C_N_R        114
+#define KB_S_N_R        19
+#define KB_C_S_R        82
+#define KB_S_S_R        19
+#define KB_C_C_R        18
+#define KB_S_C_R        19
+#define KB_C_A_R        0
+#define KB_S_A_R        19
+
+#define KB_C_N_S        115
+#define KB_S_N_S        31
+#define KB_C_S_S        83
+#define KB_S_S_S        31
+#define KB_C_C_S        19
+#define KB_S_C_S        31
+#define KB_C_A_S        0
+#define KB_S_A_S        31
+
+#define KB_C_N_T        116
+#define KB_S_N_T        20
+#define KB_C_S_T        84
+#define KB_S_S_T        20
+#define KB_C_C_T        20
+#define KB_S_C_T        20
+#define KB_C_A_T        0
+#define KB_S_A_T        20
+
+#define KB_C_N_U        117
+#define KB_S_N_U        22
+#define KB_C_S_U        85
+#define KB_S_S_U        22
+#define KB_C_C_U        21
+#define KB_S_C_U        22
+#define KB_C_A_U        0
+#define KB_S_A_U        22
+
+#define KB_C_N_V        118
+#define KB_S_N_V        47
+#define KB_C_S_V        86
+#define KB_S_S_V        47
+#define KB_C_C_V        22
+#define KB_S_C_V        47
+#define KB_C_A_V        0
+#define KB_S_A_V        47
+
+#define KB_C_N_W        119
+#define KB_S_N_W        17
+#define KB_C_S_W        87
+#define KB_S_S_W        17
+#define KB_C_C_W        23
+#define KB_S_C_W        17
+#define KB_C_A_W        0
+#define KB_S_A_W        17
+
+#define KB_C_N_X        120
+#define KB_S_N_X        45
+#define KB_C_S_X        88
+#define KB_S_S_X        45
+#define KB_C_C_X        24
+#define KB_S_C_X        45
+#define KB_C_A_X        0
+#define KB_S_A_X        45
+
+#define KB_C_N_Y        121
+#define KB_S_N_Y        21
+#define KB_C_S_Y        89
+#define KB_S_S_Y        21
+#define KB_C_C_Y        25
+#define KB_S_C_Y        21
+#define KB_C_A_Y        0
+#define KB_S_A_Y        21
+
+#define KB_C_N_Z        122
+#define KB_S_N_Z        44
+#define KB_C_S_Z        90
+#define KB_S_S_Z        44
+#define KB_C_C_Z        26
+#define KB_S_C_Z        44
+#define KB_C_A_Z        0
+#define KB_S_A_Z        44
+
+#define KB_C_N_LBRACKET 91
+#define KB_S_N_LBRACKET 26
+#define KB_C_S_LBRACKET 123
+#define KB_S_S_LBRACKET 26
+#define KB_C_C_LBRACKET KBNDEF
+#define KB_S_C_LBRACKET KBNDEF
+#define KB_C_A_LBRACKET 0
+#define KB_S_A_LBRACKET 26
+
+#define KB_C_N_BACKSLASH 92
+#define KB_S_N_BACKSLASH 43
+#define KB_C_S_BACKSLASH 124
+#define KB_S_S_BACKSLASH 43
+#define KB_C_C_BACKSLASH 28
+#define KB_S_C_BACKSLASH 43
+#define KB_C_A_BACKSLASH 0
+#define KB_S_A_BACKSLASH 43
+
+#define KB_C_N_RBRACKET 93
+#define KB_S_N_RBRACKET 27
+#define KB_C_S_RBRACKET 125
+#define KB_S_S_RBRACKET 27
+#define KB_C_C_RBRACKET KBNDEF
+#define KB_S_C_RBRACKET KBNDEF
+#define KB_C_A_RBRACKET 0
+#define KB_S_A_RBRACKET 27
+
+#define KB_C_N_BACKQUOTE 96
+#define KB_S_N_BACKQUOTE 41
+#define KB_C_S_BACKQUOTE 126
+#define KB_S_S_BACKQUOTE 41
+#define KB_C_C_BACKQUOTE KBNDEF
+#define KB_S_C_BACKQUOTE KBNDEF
+#define KB_C_A_BACKQUOTE KBNDEF
+#define KB_S_A_BACKQUOTE KBNDEF
+#endif

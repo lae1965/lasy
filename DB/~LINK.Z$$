@@ -1,0 +1,13 @@
+c:\bc\lib\c0l.obj+
+db.obj+
+dbedtrec.obj+
+dbuserkb.obj+
+dbwar.obj+
+dbwarerr.obj
+c:\sltools\sld\db.exe,
+c:\bc\lib\tools_l.lib+
+c:\bc\lib\slbase.lib+
+c:\bc\lib\emu.lib+
+c:\bc\lib\mathl.lib+
+c:\bc\lib\cl.lib
+

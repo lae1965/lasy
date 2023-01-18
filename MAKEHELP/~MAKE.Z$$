@@ -1,0 +1,12 @@
+acomp=tasm  /Mx /i$(apath)
+ccomp=bcc -c -ml -w -O -N -V -vi-
+link=tlink /x/n/c/d/v
+
+MAKEHELP.OBJ :     MAKEHELP.C
+        $(ccomp) MAKEHELP.C  >> con
+
+
+MAKEHELP.EXE :                  C:\BC\LIB\TOOLS_L.LIB  C:\BC\LIB\SLBASE.LIB \
+                             MAKEHELP.OBJ
+    $(link) @~link.z$$
+

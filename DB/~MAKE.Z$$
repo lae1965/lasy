@@ -1,0 +1,24 @@
+acomp=tasm  /Mx /i$(apath)
+ccomp=bcc -c -ml -w -O -N -V -vi-
+link=tlink /v/x/n/c/d
+
+DB.OBJ :           DB.C
+        $(ccomp) DB.C        >> con
+
+DBUSERKB.OBJ :           DBUSERKB.C
+        $(ccomp) DBUSERKB.C        >> con
+
+DBEDTREC.OBJ :           DBEDTREC.C
+        $(ccomp) DBEDTREC.C        >> con
+
+DBWAR.OBJ :        DBWAR.C
+        $(ccomp) DBWAR.C  >> con
+
+DBWARERR.OBJ :     DBWARERR.C
+        $(ccomp) DBWARERR.C  >> con
+
+C:\SLTOOLS\SLD\DB.EXE:           C:\BC\LIB\TOOLS_L.LIB C:\BC\LIB\SLBASE.LIB \
+                                 DB.OBJ DBUSERKB.OBJ DBEDTREC.OBJ DBWAR.OBJ \
+                                 DBWARERR.OBJ
+        $(link) @~link.z$$
+

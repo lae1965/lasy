@@ -1,0 +1,69 @@
+acomp=tasm  /Mx /i$(apath)
+ccomp=bcc -c -ml -w -O -N -V -vi-
+link=tlink /x/n/c/d
+
+EDTRDSLD.OBJ :       EDTRDSLD.ASM
+        $(acomp) EDTRDSLD;  >> con
+
+EDTRDCUR.OBJ :       EDTRDCUR.ASM
+        $(acomp) EDTRDCUR;  >> con
+
+EDTRDTXT.OBJ :       EDTRDTXT.ASM
+        $(acomp) EDTRDTXT;  >> con
+
+SLD2TXT.OBJ :       SLD2TXT.ASM
+        $(acomp) SLD2TXT;  >> con
+
+TXT2SLD.OBJ :       TXT2SLD.ASM
+        $(acomp) TXT2SLD;  >> con
+
+MAKEPN.OBJ :       MAKEPN.ASM
+        $(acomp) MAKEPN;  >> con
+
+TXT2BIN.OBJ :       TXT2BIN.ASM
+        $(acomp) TXT2BIN;  >> con
+
+OPTBOX.OBJ :       OPTBOX.C
+        $(ccomp) OPTBOX.C  >> con
+
+FLDDEF.OBJ :       FLDDEF.C
+        $(ccomp) FLDDEF.C  >> con
+
+COLORS.OBJ :       COLORS.C
+        $(ccomp) COLORS.C  >> con
+
+OUTTEXT.OBJ :       OUTTEXT.C
+        $(ccomp) OUTTEXT.C  >> con
+
+EDTREC.OBJ :       EDTREC.C
+        $(ccomp)  EDTREC.C  >> con
+
+EDTDUPL.OBJ :       EDTDUPL.C
+        $(ccomp)  EDTDUPL.C  >> con
+
+MAKEDOC.OBJ :       MAKEDOC.C
+        $(ccomp) MAKEDOC.C  >> con
+
+RESIZE.OBJ  :       RESIZE.C
+        $(ccomp) RESIZE.C   >> con
+
+BORDTYPE.OBJ :      BORDTYPE.C
+        $(ccomp) BORDTYPE.C >> con
+
+TREEFUN.OBJ :       TREEFUN.C
+        $(ccomp) TREEFUN.C  >> con
+
+INITREE.OBJ :       INITREE.C
+        $(ccomp) INITREE.C  >> con
+
+VALDCB.OBJ :	    VALDCB.C
+    $(ccomp) VALDCB.C   >> con
+
+e:\SLTOOLS\SLD\MAKEDOC.EXE : C:\BC\LIB\TOOLS_L.LIB   \
+                             MAKEDOC.OBJ RESIZE.OBJ BORDTYPE.OBJ EDTRDTXT.OBJ \
+                             TREEFUN.OBJ  TXT2SLD.OBJ VALDCB.OBJ SLD2TXT.OBJ \
+                             INITREE.OBJ  EDTREC.OBJ EDTRDCUR.OBJ OUTTEXT.OBJ \
+                             MAKEPN.OBJ EDTDUPL.OBJ FLDDEF.OBJ OPTBOX.OBJ \
+                             COLORS.OBJ EDTRDSLD.OBJ TXT2BIN.OBJ
+    $(link) @~link.z$$
+

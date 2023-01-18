@@ -1,0 +1,11 @@
+acomp=tasm  /Mx /i$(apath)
+ccomp=bcc -c -ml -w -O -N -V -vi- -v
+link=tlink /x/n/c/d/v
+
+
+SLINI.OBJ :       SLINI.C
+        $(ccomp) SLINI.C  >> con
+
+SLINI.EXE :                  C:\BC\LIB\TOOLS_L.LIB   \
+                             SLINI.OBJ
+    $(link) @~link.z$$

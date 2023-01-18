@@ -1,0 +1,11 @@
+acomp=tasm  /Mx /i$(apath)
+ccomp=bcc -c -ml -w -O -N -V -vi- -r- -v
+link=tlink /x/n/c/d/v
+
+HZ.OBJ :     HZ.C
+        $(ccomp) HZ.C  >> con
+
+HZ.EXE :               C:\BC\LIB\TOOLS_L.LIB  C:\BC\LIB\SLBASE.LIB \
+                            HZ.OBJ 
+    $(link) @link1.z$$
+

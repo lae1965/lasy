@@ -1,0 +1,199 @@
+;
+;   BEGASM.MAC  --  Header file to set up segmentt and procs.
+;
+;  Version 3.00 (C)Copyright Novintech Inc. 1990
+
+include   compiler.mac          ; Specifies the C compiler and
+                                ; memory model.
+ifdef NTINY
+    .MODEL SMALL
+endif
+
+ifdef NSMALL
+    .MODEL SMALL
+endif
+
+ifdef NMEDIUM
+    .MODEL MEDIUM
+endif
+
+ifdef NCOMPACT
+    .MODEL COMPACT
+endif
+
+ifdef NLARGE
+    .MODEL LARGE
+endif
+
+ifdef NHUGE
+    .MODEL HUGE
+endif
+
+NO              equ     0
+YES             equ     1
+
+
+if @codesize
+    longProg        equ 1
+    shortProg       equ 0
+    sizeCPointer    equ 4
+    stkoff          equ 6
+else
+    longProg        equ 0
+    shortProg       equ 1
+    sizeCPointer    equ 2
+    stkoff          equ 4
+endif
+
+if @datasize
+    longData        equ 1
+    shortData       equ 0
+    sizeDPointer    equ 4
+else
+    longData        equ 0
+    shortData       equ 1
+    sizeDPointer    equ 2
+endif
+
+sizeChar            equ 1
+sizeCharOnStk       equ 2
+sizeDouble          equ 8
+sizeEnum            equ 2
+sizeFloat           equ 4
+sizeInt             equ 2
+sizeLong            equ 4
+sizeLongDouble      equ 10
+sizeShort           equ 2
+
+beginCseg macro         ;;Begin code macro.
+    .CODE
+endm
+
+endCseg macro           ;;End code macro.
+endm
+
+beginDseg macro         ;;Begin code macro.
+    .DATA
+endm
+
+endDseg macro           ;;End code macro.
+endm
+
+beginMod macro mname    ;;Begin module macro.
+	name mname
+endm
+
+endMod macro mname         ;;End module macro.
+; end module mname
+endm
+
+beginProc macro pname      ;;Beg in procedure macro.
+    public _&pname
+    _&pname proc
+endm
+
+endProc macro pname        ;;End procedure macro.
+	_&pname endp
+endm
+
+IF      longData
+    LDATA           equ     longData
+    DPTR_           equ     DWORD PTR
+    dPtrSize        equ     4
+    LES_            equ     LES
+    ES_             equ     ES:
+    SS_             equ     SS:
+    LDS_            equ     LDS
+
+    pushDS_     macro
+            PUSH    DS
+    endm
+
+    popDS_      macro
+            POP    DS
+    endm
+
+    PushPtr     macro   dPtrOff, dPtrSeg
+            PUSH    dPtrSeg
+            PUSH    dPtrOff
+    endm
+
+ELSE
+    DPTR_           equ     WORD PTR
+    dPtrSize        equ     2
+    LES_            equ     MOV
+    ES_             equ     DS:
+    SS_             equ     DS:
+    LDS_            equ     MOV
+
+    pushDS_     macro
+    endm
+
+    popDS_      macro
+    endm
+
+    PushPtr     macro   dPtrOff, dPtrSeg
+            PUSH    dPtrOff
+    endm
+
+ENDIF
+
+popff  macro                ;; Simulate POPF instruction w/o bugs
+	local	do_call, do_iret
+	jmp	short do_call
+
+do_iret:
+    iret                    ;; Pop IP, CS, flags.
+
+do_call:
+    push   cs               ;; Push CS
+    call   do_iret          ;; Push IP & jump.
+endm
+
+beginProg macro zname       ;;Generic begin program macro.
+    beginMod zname
+    beginCseg
+    beginProc zname
+endm
+
+endProg macro zname         ;;Generic end program macro.
+    endProc zname
+    endCseg
+    endMod zname
+endm
+
+saveregs    macro
+    push    ds
+    push    si
+    push    di
+endm
+
+restore    macro
+    pop     di
+    pop     si
+    pop     ds
+endm
+
+beginCode   macro  loc
+    push    bp
+    mov     bp,     sp
+    ifnb    <loc>
+        sub     sp,     loc
+    endif
+endm
+
+endCode     macro
+    mov     sp,     bp
+    pop     bp
+    ret
+endm
+
+StartCode   macro   loc
+    beginCode   loc
+    saveregs
+endm
+
+FinishCode macro
+    restore
+    endCode
+endm

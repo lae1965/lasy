@@ -1,0 +1,60 @@
+        include begasm.mac
+
+EXTRN   _MS_buttons:WORD
+EXTRN   _MS_mode:WORD
+EXTRN   _MS_unhide:WORD
+MS_buttons@     equ     _MS_buttons
+MS_mode@     	equ     _MS_mode
+MS_unhide@      equ     _MS_unhide
+
+MSI     equ     33h             ; Mouse Interrupt
+
+;------------------------------------------------------------
+callM           MACRO
+        int     MSI             ;; Call mouse functions
+        ENDM
+
+;------------------------------------------------------------
+CheckMouse      MACRO
+        LOCAL   ok, check_gr
+        pushDS_
+        IF      longData
+        mov     ax, SEG MS_buttons@
+        mov     ds, ax
+        ENDIF
+        mov     ax, [MS_buttons@]   ;;
+        or      ax, ax
+        jnz     ok
+        popDS_             		;;
+        ret                             ;; return NO if mouse not installed
+ok:
+        jmp     short check_gr
+$ms_mode dw      0                       ;; Text default
+check_gr:
+        mov     ax, [MS_mode@]
+        mov     cs:[$ms_mode], ax        ;; 1 - if graphic
+        popDS_                           ;;
+        ENDM
+
+;------------------------------------------------------------
+CheckMode       MACRO
+        LOCAL   ok
+        pushDS_
+        IF      longData
+        mov     ax, SEG MS_mode@
+        mov     ds, ax
+        ENDIF
+        mov     ax, [MS_mode@]  ;;
+        popDS_                  ;;
+        clc                     ;; Clear Cary bit
+        or      ax, ax
+        jz     	ok
+        sec                     ;; return (SC) if graphics mode
+ok:
+        ENDM
+
+;------------------------------------------------------------
+return_bool     MACRO   cond
+        mov     ax, cond
+        ret
+        ENDM

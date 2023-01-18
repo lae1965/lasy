@@ -1,0 +1,9 @@
+c:\bc\lib\c0l.obj+
+hz.obj
+hz.exe,
+c:\bc\lib\tools_l.lib+
+c:\bc\lib\slbase.lib+
+c:\bc\lib\emu.lib+
+c:\bc\lib\mathl.lib+
+c:\bc\lib\cl.lib
+

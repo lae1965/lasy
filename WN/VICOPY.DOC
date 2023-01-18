@@ -1,0 +1,108 @@
+ wnvicopy - Read or write rectangle directly from or to video adapter
+
+ bool wnvicopy (char far **ppfrom, char far **ppto, int num_rows,
+                int row_length, int scn_width, int attr, int option);
+
+ char far **   ppfrom          Pointer to far char pointer containing
+                               address of source buffer
+ char far **   ppto            Pointer to far char pointer containing
+                               address of destination buffer
+ int           num_rows        Number of rows in the rectangle
+ int           row_length      Width of the rectangle (in columns)
+ int           scn_width       Twice the screen width (80 or 160 bytes)
+ int           attr            Foreground and background attributes
+ int           option          Style and direction of I/O; also
+                               whether interference is to be prevented.
+                               See discussion and table below.
+
+This function reads or writes a rectangular buffer
+directly from or to the video memory on an IBM
+Color/Graphics Adapter, Monochrome Adapter, or
+compatible adapter.  It can do so with attention to the
+horizontal and vertical retrace intervals for maximum
+throughput without interference.  The characters are
+transferred row by row.
+
+The buffer addresses are stored in far char pointers
+pointed to by ppfrom and ppto.  Either or both of these
+may point to physical locations in video memory,
+depending on the value of option.
+
+Several styles of I/O are available.  They are selected
+by the value of option.  Bit 15 of option, if set,
+indicates that the transfer is to be performed without
+regard to interference.  The remaining bits of option
+form an integer which should be selected from the
+following table:
+
+Option  Description
+------  -----------
+0       Write characters to the screen without attributes.
+        *ppfrom points to a buffer of characters.
+1       Write characters to the screen with attributes.
+        *ppfrom points to a buffer of (char,attr) pairs.
+2       Write characters to the screen with constant
+        attribute specified by attr.
+        *ppfrom points to a buffer of characters.
+3       Fill screen rectangle with constant char & attr.
+        *ppfrom points to the character.
+        Attr specifies the attribute.
+4       Fill screen rectangle with constant attribute
+        without altering characters displayed.
+        ppfrom is ignored.
+5       Read characters from screen without attributes.
+        **ppto is filled with the characters.  (Note
+        that no trailing NUL is added.)
+6       Read characters from screen with attributes.
+        **ppto is filled with (char,attr) pairs.
+7       Copy window (with attributes) upward or directly
+        leftward on same display page.
+8       Copy window (without attributes) upward or
+        directly leftward on same display page.
+9       Copy window (with attributes) downward or
+        directly rightward on same display page.
+10      Copy window (without attributes) downward or
+        directly rightward on same display page.
+11      Copy window (with attributes) to non-overlapping
+        window or to another display page.
+12      Copy window (without attributes) to non-
+        overlapping window or to another display page.
+
+Beware:  None of the arguments is checked for
+correctness (except that option is checked for
+out-of-range values)!
+
+If bit 15 of option is clear (indicating protection
+against interference), interrupts will be left enabled
+when this procedure exits.
+
+ Returns       YES     if okay.
+               NO      if option is unknown,
+------------------------------------------------------------
+
+int wnviwrit (int u_row, int u_col, int l_row, int l_col,
+              char *buffer, int fore, int back, int option)
+{
+    int  height, width, command;
+    char far *pbuf;
+    char far *pscreen;
+
+    if (N_V_STATE.mode > 3 && N_V_STATE.mode != 7)
+        return (0);
+
+    height  = l_row - u_row + 1;
+    width   = l_col - u_col + 1;
+
+        command = 0;          - в buffer только символы; атрибут игнор.
+        command = 1;          - в buffer и атрибуты и символы
+        command = 2;          - в buffer только символы; атрибут из attr
+
+    if (wnishigh() || MOD_MONO)
+        command |= 0x8000;
+    pbuf    = buffer;
+    pscreen = wnviptrl (u_row, u_col);
+    wnvicopy (&pbuf, &pscreen, height, width, NUM_COLS * 2,
+              utnybbyt(back,fore),command);
+    return (0);
+}
+

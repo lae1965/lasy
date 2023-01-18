@@ -1,0 +1,854 @@
+/*****************************************************************************
+    wniniwin - Определяет начальные установки для функций "оконного" интерфейса.
+
+int wninit (int mode, int rows);
+
+int     mode;       Видео режим
+int     rows;       Число строк для дисплея
+
+Выход:  Число строк на экране или 0 в случае неудачи
+
+*****************************************************************************/
+
+#include <time.h>
+#include <stdlib.h>
+#include <dos.h>
+#include <slmenu.h>
+#include <slmous.h>
+#include <slkeyb.h>
+
+void far    wnhandms     (int ev, int bs, int xp, int yp, int xd, int yd);
+static bool wnsetadp     (VIDEO_STATE *mvs);
+static bool chk_VGA      (int *monitor);
+static bool chk_Olivetti (int *adapter);
+static int  hard_handler (int errval, int ax, int bp, int si);
+
+/************************************************************************/
+/*                     Global variables                                 */
+/************************************************************************/
+
+int         Kb_2_buf [17], * Kb_2_head, * Kb_2_tail;
+int         Err_Val;
+int         Err_Disk;
+int         Err_Hard = NO;
+VIDEO_STATE N_V_STATE;              /* Current characteristics of adapter   */
+CURNT_STATE n_w_envr;               /* Current window environment           */
+WINDOW    * Win_List = NULL;        /* Pointer to WINDOW structures list    */
+WINDOW    * Cur_Wind = NULL;        /* Window selected for I/O or NULL      */
+WINDOW    * Lst_Wind = NULL;        /* Window witch last selected for I/O   */
+MENU      * Cur_Menu = NULL;        /* Pointer to a current menu            */
+int         Cmd[13] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+ATTRIB      Att_Wind, Att_User, Att_Work, Att_Chlp, Att_Roll, Att_Edit;
+ATTRIB      Att_Khlp, Att_Mnu1, Att_Mnu2, Att_Disk, Att_Warn, Att_Tree;
+char Pal_Stnd [17] = {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x14, 0x07,
+    0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x00
+};
+char Pal_Cur [17];
+
+static ATTRIB      Att_Colr_User   = {
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TEXT Trade Mark  */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BORD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TITL             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* HIGH             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* PROT             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BOLD             */
+    wnscattr (SL_BLUE,  SL_WHITE|SL_INTENSITY),      /* ERR  Background  */
+    wnscattr (SL_BLACK, SL_CYAN),                 /* SHDW Shadows     */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BLCK             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* AFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* NFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY) };     /* NICE             */
+
+static ATTRIB      Att_Mono_User   = {
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_REVERSE,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL };
+
+static ATTRIB Att_Colr_Wind = {
+    wnscattr (SL_WHITE,    SL_BLACK),                /* TEXT */
+    wnscattr (SL_WHITE,    SL_RED),                  /* BORD */
+    wnscattr (SL_WHITE,    SL_RED),                  /* TITL */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* HIGH */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* PROT */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* BOLD */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* ERR  */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* SHDW */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* BLCK */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* AFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* NFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY) };/* NICE */
+
+static ATTRIB Att_Mono_Wind = {
+    SL_NORMAL,                                 /* TEXT */
+    SL_NORMAL,                                 /* BORD */
+    SL_NORMAL,                                 /* TITL */
+    SL_REVERSE,                                /* HIGH */
+    SL_REVERSE,                                /* PROT */
+    SL_NORMAL|SL_INTENSITY,                    /* BOLD */
+    SL_NORMAL|SL_INTENSITY,                    /* ERR  */
+    SL_NORMAL|SL_INTENSITY,                    /* SHDW */
+    SL_NORMAL,                                 /* BLCK */
+    SL_NORMAL,                                 /* AFLD */
+    SL_NORMAL,                                 /* NFLD */
+    SL_NORMAL                                  /* NICE */
+};
+
+static ATTRIB Att_Colr_Mnu1 = {
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TEXT */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* BORD */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TITL */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* HIGH */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* PROT */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* BOLD */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* ERR  */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* SHDW */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* BLCK */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* AFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* NFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY) };/* NICE */
+
+static ATTRIB Att_Mono_Mnu1 = {
+    SL_NORMAL,                                 /* TEXT */
+    SL_NORMAL,                                 /* BORD */
+    SL_NORMAL,                                 /* TITL */
+    SL_REVERSE,                                /* HIGH */
+    SL_REVERSE,                                /* PROT */
+    SL_NORMAL|SL_INTENSITY,                    /* BOLD */
+    SL_NORMAL|SL_INTENSITY,                    /* ERR  */
+    SL_NORMAL|SL_INTENSITY,                    /* SHDW */
+    SL_NORMAL,                                 /* BLCK */
+    SL_NORMAL,                                 /* AFLD */
+    SL_NORMAL,                                 /* NFLD */
+    SL_NORMAL                                  /* NICE */
+};
+
+static ATTRIB Att_Colr_Mnu2 = {
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TEXT */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* BORD */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TITL */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* HIGH */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* PROT */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* BOLD */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* ERR  */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* SHDW */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* BLCK */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* AFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* NFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY) };/* NICE */
+
+static ATTRIB Att_Mono_Mnu2 = {
+    SL_NORMAL,                                 /* TEXT */
+    SL_NORMAL,                                 /* BORD */
+    SL_NORMAL,                                 /* TITL */
+    SL_REVERSE,                                /* HIGH */
+    SL_REVERSE,                                /* PROT */
+    SL_NORMAL|SL_INTENSITY,                    /* BOLD */
+    SL_NORMAL|SL_INTENSITY,                    /* ERR  */
+    SL_NORMAL|SL_INTENSITY,                    /* SHDW */
+    SL_NORMAL,                                 /* BLCK */
+    SL_NORMAL,                                 /* AFLD */
+    SL_NORMAL,                                 /* NFLD */
+    SL_NORMAL                                  /* NICE */
+};
+
+static ATTRIB Att_Colr_Chlp = {
+    wnscattr (SL_MAGENTA,  SL_CYAN | SL_INTENSITY),  /* TEXT */
+    wnscattr (SL_MAGENTA,  SL_CYAN | SL_INTENSITY),  /* BORD */
+    wnscattr (SL_MAGENTA,  SL_WHITE| SL_INTENSITY),  /* TITL */
+    wnscattr (SL_CYAN,     SL_WHITE| SL_INTENSITY),  /* HIGH */
+    wnscattr (SL_CYAN,     SL_WHITE| SL_INTENSITY),  /* PROT */
+    wnscattr (SL_MAGENTA,  SL_WHITE| SL_INTENSITY),  /* BOLD */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* ERR  */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* SHDW */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* BLCK */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* AFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* NFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY) };/* NICE */
+
+static ATTRIB Att_Mono_Chlp = {
+    SL_NORMAL,                     /* TEXT */
+    SL_NORMAL,                     /* BORD */
+    SL_NORMAL,                     /* TITL */
+    SL_REVERSE,                    /* HIGH */
+    SL_REVERSE,                    /* PROT */
+    SL_NORMAL|SL_INTENSITY,        /* BOLD */
+    SL_NORMAL|SL_INTENSITY,        /* ERR  */
+    SL_NORMAL|SL_INTENSITY,        /* SHDW */
+    SL_NORMAL,                     /* BLCK */
+    SL_NORMAL,                     /* AFLD */
+    SL_NORMAL,                     /* NFLD */
+    SL_NORMAL                      /* NICE */
+};
+
+static ATTRIB Att_Colr_Khlp = {
+    wnscattr (SL_CYAN,     SL_BLACK),                /* TEXT */
+    wnscattr (SL_MAGENTA,  SL_CYAN | SL_INTENSITY),  /* BORD */
+    wnscattr (SL_MAGENTA,  SL_WHITE| SL_INTENSITY),  /* TITL */
+    wnscattr (SL_CYAN,     SL_WHITE| SL_INTENSITY),  /* HIGH */
+    wnscattr (SL_CYAN,     SL_WHITE| SL_INTENSITY),  /* PROT */
+    wnscattr (SL_BLACK,    SL_WHITE),                /* BOLD */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* ERR  */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY), /* SHDW */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* BLCK */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* AFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY), /* NFLD */
+    wnscattr (SL_BLUE,     SL_CYAN  | SL_INTENSITY)  /* NICE */
+};
+static ATTRIB Att_Mono_Khlp = {
+    SL_NORMAL,                     /* TEXT */
+    SL_NORMAL,                     /* BORD */
+    SL_NORMAL,                     /* TITL */
+    SL_REVERSE,                    /* HIGH */
+    SL_REVERSE,                    /* PROT */
+    SL_REVERSE,                    /* BOLD */
+    SL_NORMAL|SL_INTENSITY,        /* ERR  */
+    SL_NORMAL|SL_INTENSITY,        /* SHDW */
+    SL_NORMAL,                     /* BLCK */
+    SL_NORMAL,                     /* AFLD */
+    SL_NORMAL,                     /* NFLD */
+    SL_NORMAL                      /* NICE */
+};
+
+static ATTRIB Att_Colr_Disk = {
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* TEXT */
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* BORD */
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* TITL */
+    wnscattr (SL_CYAN ,   SL_BLACK),                 /* HIGH */
+    0,                                               /* PROT */
+    wnscattr (SL_WHITE,   SL_BROWN | SL_INTENSITY)   /* BOLD */
+};
+static ATTRIB Att_Mono_Disk = {
+    SL_REVERSE,                                /* TEXT */
+    SL_REVERSE,                                /* BORD */
+    SL_REVERSE,                                /* TITL */
+    SL_NORMAL,                                 /* HIGH */
+    0,                                         /* PROT */
+    SL_NORMAL|SL_INTENSITY                     /* BOLD */
+};
+
+static ATTRIB Att_Colr_Roll = {
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TEXT */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* BORD */
+    wnscattr (SL_CYAN,     SL_WHITE | SL_INTENSITY), /* TITL */
+    wnscattr (SL_BLACK,    SL_WHITE | SL_INTENSITY), /* HIGH */
+    wnscattr (SL_CYAN,     SL_BLUE),                 /* PROT */
+    wnscattr (SL_CYAN,     SL_BROWN | SL_INTENSITY)  /* BOLD */
+};
+static ATTRIB Att_Mono_Roll = {
+    SL_NORMAL,                                 /* TEXT */
+    SL_NORMAL,                                 /* BORD */
+    SL_NORMAL,                                 /* TITL */
+    SL_REVERSE,                                /* HIGH */
+    SL_NORMAL,                                 /* PROT */
+    SL_NORMAL|SL_INTENSITY                     /* BOLD */
+};
+
+static ATTRIB Att_Colr_Work = {
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* TEXT */
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* BORD */
+    0,                                               /* TITL */
+    wnscattr (SL_BLACK,   SL_WHITE),                 /* HIGH */
+    0,                                               /* PROT */
+    wnscattr (SL_WHITE,   SL_WHITE|SL_INTENSITY)     /* BOLD */
+};
+static ATTRIB Att_Mono_Work = {
+    SL_REVERSE,                                /* TEXT */
+    SL_REVERSE,                                /* BORD */
+    0,                                         /* TITL */
+    SL_NORMAL,                                 /* HIGH */
+    0,                                         /* PROT */
+    SL_REVERSE                                 /* BOLD */
+};
+
+static ATTRIB Att_Colr_Warn = {
+    wnscattr (SL_RED,     SL_WHITE | SL_INTENSITY),  /* TEXT */
+    wnscattr (SL_RED,     SL_WHITE | SL_INTENSITY),  /* BORD */
+    wnscattr (SL_RED,     SL_WHITE | SL_INTENSITY),  /* TITL */
+    wnscattr (SL_WHITE,   SL_BLACK),                 /* HIGH */
+    0,                                               /* PROT */
+    wnscattr (SL_RED,     SL_BROWN | SL_INTENSITY)   /* BOLD */
+};
+static ATTRIB Att_Mono_Warn = {
+    SL_REVERSE,                                /* TEXT */
+    SL_REVERSE,                                /* BORD */
+    SL_REVERSE,                                /* TITL */
+    SL_NORMAL,                                 /* HIGH */
+    0,                                         /* PROT */
+    SL_NORMAL|SL_INTENSITY                     /* BOLD */
+};
+static ATTRIB      Att_Colr_Edit   = {
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TEXT Trade Mark  */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BORD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TITL             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* HIGH             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* PROT             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BOLD             */
+    wnscattr (SL_BLUE,  SL_WHITE|SL_INTENSITY),      /* ERR  Background  */
+    wnscattr (SL_BLACK, SL_CYAN),                 /* SHDW Shadows     */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BLCK             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* AFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* NFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY) };     /* NICE             */
+
+static ATTRIB      Att_Mono_Edit   = {
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_REVERSE,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL };
+
+static ATTRIB      Att_Colr_Tree   = {
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TEXT Trade Mark  */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BORD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* TITL             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* HIGH             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* PROT             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BOLD             */
+    wnscattr (SL_BLUE,  SL_WHITE|SL_INTENSITY),      /* ERR  Background  */
+    wnscattr (SL_BLACK, SL_CYAN),                 /* SHDW Shadows     */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* BLCK             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* AFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY),       /* NFLD             */
+    wnscattr (SL_BLUE,  SL_CYAN|SL_INTENSITY) };     /* NICE             */
+
+static ATTRIB      Att_Mono_Tree   = {
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_REVERSE,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL,
+    SL_NORMAL };
+
+
+/************************************************************************/
+/*                        WNINIWIN                                      */
+/************************************************************************/
+
+static VIDEO_STATE state;           /* Previos characteristics adapter  */
+static char init_with_clear = 0;    /* Flag for wnfinwin() :            */
+                                    /* 0 - restore previos cursor       */
+                                    /* 1 - restore previos mode, cursor */
+static  LOCATE  cur_loc;            /* Relative location of own cursor  */
+static  CURTYP  cur_typ;            /* Cursor type.                     */
+static  char  * wnprvimg = "WNPRVIMG.▓▓▓";
+
+int  cdecl wniniwin (int mode, int rows) {
+    union REGS reg;                     /* registers definition         */
+    char  sc_line;                      /* scan lines on the screen VGA */
+                                        /* 0-200; 1-350; 2-400          */
+	char  font;                         /* 11h-8x14; 12h-8x8; 14h-8x16  */
+    int   eq_list, i;                   /* for equipment list           */
+    char far * pscreen, * pdata;
+    int   hand;
+
+    if (!n_w_envr.known) {
+        if (wnsetadp (&state) == NO) return (0);
+        N_V_STATE = state;
+        n_w_envr.n_a_page = n_w_envr.n_v_page = utpeekb (uttofaru (0x40, 0x62));
+
+        reg.h.ah = 3;
+		reg.h.bh = (char)n_w_envr.n_a_page;
+        int86 (WN_V_INT, &reg, &reg);
+        cur_loc.row  = reg.h.dh;
+        cur_loc.col  = reg.h.dl;
+        cur_typ.high = reg.h.ch;
+        cur_typ.low  = reg.h.cl;
+		n_w_envr.known = 1;
+        if (wnishigh () || MOD_MONO)
+            for (i = 0; i < 13; i++)      Cmd[i] |= 0x8000;
+
+        if (MOD_MONO) {
+            Att_Wind = Att_Mono_Wind;
+            Att_User = Att_Mono_User;
+            Att_Work = Att_Mono_Work;
+            Att_Chlp = Att_Mono_Chlp;
+            Att_Khlp = Att_Mono_Khlp;
+            Att_Mnu1 = Att_Mono_Mnu1;
+            Att_Mnu2 = Att_Mono_Mnu2;
+            Att_Roll = Att_Mono_Roll;
+            Att_Disk = Att_Mono_Disk;
+            Att_Warn = Att_Mono_Warn;
+            Att_Edit = Att_Mono_Edit;
+            Att_Tree = Att_Mono_Tree;
+        } else {
+            Att_Wind = Att_Colr_Wind;
+            Att_User = Att_Colr_User;
+            Att_Work = Att_Colr_Work;
+            Att_Chlp = Att_Colr_Chlp;
+            Att_Khlp = Att_Colr_Khlp;
+            Att_Mnu1 = Att_Colr_Mnu1;
+            Att_Mnu2 = Att_Colr_Mnu2;
+            Att_Roll = Att_Colr_Roll;
+            Att_Disk = Att_Colr_Disk;
+            Att_Warn = Att_Colr_Warn;
+            Att_Edit = Att_Colr_Edit;
+            Att_Tree = Att_Colr_Tree;
+        }
+
+        msinst ();
+        mshide ();
+        msptsmsk (SL_WHITE, SL_WHITE, 0, MS_XOR);
+
+        pdata = malloc (NUM_ROWS * NUM_COLS * 2);  /* БП */
+        hand = utcreate (wnprvimg);
+        pscreen = wnviptrl (0, 0);
+        wnvicopy (&pscreen,&pdata,NUM_ROWS,NUM_COLS,NUM_COLS*2,0,Cmd[6]);
+        utwrite (hand, pdata, NUM_ROWS * NUM_COLS * 2);
+        free (pdata);
+        utclose (hand);
+
+        randomize ();
+        Kb_2_head = Kb_2_tail = Kb_2_buf;
+    }
+
+    if (mode != _PREVIOS) {
+        rows = (rows == _PREVIOS) ? state.numtextrows : rows;
+        if (!utrange (mode, _TEXTBW40, _TEXTC80) || mode == _TEXTMONO) {
+            if (state.adapter == _VGA || state.adapter == _OVGA ||
+                    state.adapter == _EGA || state.adapter == _OEGA ||
+                                                    state.adapter == _MCGA) {
+                switch (rows) {
+                    case  _MIDROWS:
+                        sc_line = 1;    /* 350 scan lines               */
+                        font = 0x12;    /* 8x8  font                    */
+                        break;
+                    case  _MAXROWS:
+                        sc_line = 2;    /* 400 scan lines               */
+                        font = 0x12;    /* 8x8  font                    */
+                        break;
+                    case  _MINROWS:
+                    default:
+                        sc_line = 2;    /* 400 scan lines               */
+                        font = (N_V_STATE.adapter == _VGA  ||
+                                N_V_STATE.adapter == _OVGA ||
+                                        N_V_STATE.adapter == _MCGA ) ?
+                                                (char)0x14 : (char)0x11;
+                                                        /* 8x16 or 8x14 font */
+                        break;
+                }
+                if (state.adapter == _VGA || state.adapter == _OVGA ||
+                                                    state.adapter == _MCGA) {
+
+                    reg.h.bl = 0x30;    /* Select scan lines VGA    */
+                    reg.h.al = sc_line; /* 0 - 200; 1 - 350; 2 - 400*/
+                    reg.h.ah = 0x12;    /* Alternate select         */
+                    int86 (WN_V_INT, &reg, &reg);
+
+                    eq_list = utpeekw (uttofaru (0x40, 0x10));
+                    if (mode == 7 && (eq_list & 0x30) !=  0x30)
+                        utpokew (uttofaru (0x40, 0x10), (eq_list | 0x30));
+                    else if ((eq_list & 0x30) == 0x30)
+                        utpokew (uttofaru(0x40, 0x10), (eq_list & ~0x30));
+                } else  mode = (mode == _TEXTMONO) ? _TEXTC80 : mode;
+
+                reg.h.al = (char)mode;      /* mode number          */
+                reg.h.ah = 0;               /* Set mode regim       */
+                int86 (WN_V_INT, &reg, &reg);
+
+                reg.h.al = font;
+                reg.h.bl = 0;               /* Block to load        */
+                reg.h.ah = 0x11;            /* Character Generator  */
+                int86 (WN_V_INT, &reg, &reg);
+
+       /************************************ Set PrintScreen routine
+                if (rows != _MINROWS) {
+                    reg.h.bl = 0x20;
+                    reg.h.ah = 0x12;
+                    int86 (WN_V_INT, &reg, &reg);
+                }
+       *********************************************************************/
+            } else {
+                reg.h.al = (char)mode;      /* mode number          */
+                reg.h.ah = 0;               /* Set mode regim       */
+                int86 (WN_V_INT, &reg, &reg);
+            }
+            init_with_clear = 1;
+        }  else  return (0);
+    }
+
+    if (!wnsetadp (&N_V_STATE)) return (0);
+    n_w_envr.n_a_page = n_w_envr.n_v_page = utpeekb (uttofaru (0x40, 0x62));
+    reg.h.ah = 1;
+    reg.x.cx = 0x2000;
+    int86 (WN_V_INT, &reg, &reg);
+
+    if (N_V_STATE.mode > 3 && N_V_STATE.mode != 7) return 0;
+
+
+    msbound (0, 0, NUM_ROWS - 1, NUM_COLS - 1);
+
+
+    harderr (hard_handler);
+
+    return (NUM_ROWS);
+}
+
+/*
+    wnfinwin - Восстанавливает состояние адаптера и курсора, как до winiwin()
+
+void wnfinwin (void);
+
+*/
+
+void wnfinwin (void) {
+    union REGS reg;
+    char far * pscreen, * pdata;
+    int   hand;
+
+    if (init_with_clear)
+        wniniwin (state.mode, state.numtextrows);
+
+    pdata = malloc (NUM_ROWS * NUM_COLS * 2); /* Б П */
+
+    if ((hand = utopen (wnprvimg, UT_R)) != -1) {
+        pscreen = wnviptrl (0, 0);
+        utread (hand, pdata, NUM_ROWS * NUM_COLS * 2);
+        wnvicopy (&pdata, &pscreen, NUM_ROWS, NUM_COLS, NUM_COLS*2, 0,
+                            1 + ((wnishigh () || MOD_MONO) ? 0x8000 : 0));
+        utclose (hand);
+        utremove (wnprvimg);
+    }
+    free (pdata);
+
+
+
+    reg.h.dh =  cur_loc.row;
+    reg.h.dl =  cur_loc.col;
+	reg.h.bh =  (char)n_w_envr.n_a_page;
+    reg.h.ah =  2;
+    int86 (WN_V_INT, &reg, &reg);
+
+    reg.h.ch =  cur_typ.high;
+    reg.h.cl =  cur_typ.low;
+    reg.h.ah = 1;
+    int86 (WN_V_INT, &reg, &reg);
+
+    reg.x.ax = 0;           /* Reset mouse driver. */
+    int86 (0x33, &reg, &reg);
+    wnsetpal (NULL);
+}
+
+/*
+    wnsetadp - Explore  givens adapter and monitor
+
+bool wnsetadp (VIDEO_STATE *state);
+
+VIDEO_STATE *state;    Adapter and Monitor characteristics
+
+Description Know types of adapter and monitor and it's characteristics.
+
+Returns     YES         if success
+            NO          if not
+            state       Info returning structure.
+*/
+
+static bool cdecl wnsetadp (VIDEO_STATE *mvs) {
+
+	union   REGS    inpreg, outreg;     /* for int86()                  */
+	struct SREGS    segreg;             /* for int86x()                 */
+
+    char    Buf1[0x40];                 /* Temporary buffer for  0x1B   */
+                                        /* video function               */
+    char    far  *  stat_info_ptr;      /* pointer to VGA static info   */
+    int     adapter, monitor, mem;      /* Adapter type                 */
+                                        /* Monitor type and             */
+                                        /* Memory config. info          */
+   char EQP = utpeekb(uttofaru(0x40, 0x10)); /* Equipment list          */
+
+    /* Predicate assumption */
+    adapter = _CGA;
+    monitor = _COLOR;
+    mem     = 0x10;
+
+    /* Check for VGA presents */
+	segreg.es   = utseg(Buf1);
+    inpreg.x.di = utoff(Buf1);
+    inpreg.x.bx = 0;                /* 16k        */
+    inpreg.x.ax = 0x1B00;           /* MOV AH,1Bh */
+    int86x (WN_V_INT, &inpreg, &outreg, &segreg);
+    if(outreg.h.al != 0x1B) adapter = _EGA;
+    else {
+        /* VGA adapter presents, check it ... */
+
+        /* Check Display Combination Code   */
+        if(Buf1[ 0x25 ] < 6) adapter = _EGA;
+        else {
+            mem = (int)Buf1[ 0x31 ];/* Get adapter memory size  0 - 64k,
+                                     * 1 - 128k, 2 - 192k, 3 - 256k
+                                     * other - reserved for IBM future  */
+
+            /* Set pointer to adapter static information */
+            stat_info_ptr = uttofar(
+                                    *(unsigned*)(Buf1+2), /* Segment   */
+                                    *(unsigned*)(Buf1),   /* Offset    */
+                                    char );               /* Type      */
+                                           /* Assumptions              */
+            adapter = _MCGA;
+            monitor = _ANALOGCOLOR;
+
+            /* Check for Monitor type with valid modes information */
+            if( (stat_info_ptr[ 2 ] & 4) != 0 ) monitor = _ANALOG;
+            if( chk_VGA( &monitor ) == YES ) adapter = _VGA;
+            else adapter = _CGA;
+        }
+    }
+
+    if( adapter == _EGA ) {      /* Sequetial check for others adapters */
+                                 /* Check for _EGA                      */
+        inpreg.h.bl = 0x10;      /* Return EGA information              */
+        inpreg.h.ah = 0x12;
+        int86 (WN_V_INT, &inpreg, &outreg );
+
+        if( (outreg.h.bl & 0xFC) != 0 ) /* function not supported - not EGA */
+            adapter = _CGA;
+        else {                          /* function supported               */
+			outreg.h.ah = 0;
+            if( (EQP & 0x30) == 0x30 ) outreg.h.ah = 1;
+
+            if( outreg.h.ah != outreg.h.bh )
+            /* Different values in Equipment List and EGA information */
+                    adapter = _CGA;
+            else  {
+                mem = (int)outreg.h.bl;  /* Get Adapter Memory in BL */
+
+                adapter = _EGA;
+                monitor = _MONO;
+
+                /* Check with switches */
+                if( (outreg.h.cl & 0x0F) <= 5 ) outreg.h.cl += 6;
+                outreg.h.cl -= 9;
+				if( outreg.h.cl == 0 )  monitor = _ENHCOLOR;
+            }
+        }
+    }
+
+    if(adapter != _CGA) {
+                    /* Adapter is...(see above). Calculate it's  memory size */
+        mem = (++mem) << 6;      /* Transformate to kB */
+    }
+    else if( adapter == _CGA ) {   /* _CGA or unknown adapter */
+        if( (EQP & 0x30) == 0x30 ) {
+            monitor--;
+            adapter--;
+            mem = 4;
+        }
+    }
+
+    /* Sequencial check for others adapters */
+    if( (adapter & 0x0E) != 0 && chk_Olivetti(&adapter) == YES && mem <= 0x20)
+        mem = 0x20;
+    inpreg.x.dx = -1;
+    inpreg.h.ah = 0xEF;                 /* Unknown special for HGC */
+    int86( WN_V_INT, &inpreg, &outreg );
+    if(outreg.h.dl != 0xFF) {
+        if( (adapter & 1 ) != 0 ) {
+            adapter = _HGC;
+            mem     = 0x40;
+			if( outreg.h.dh == 0 ) mem >>= 1;
+		}
+    }
+    mvs->adapter = adapter;
+    mvs->monitor = monitor;
+    mvs->memory  = mem;
+
+    /******************************************************
+     * Put to structure other parameters:
+     * numtextcols;
+     * numtextrows;
+     * numcolors;
+     * numvideopages;
+     * mode;
+     * bytes_char;
+     */
+    inpreg.h.ah = 0x0F;     /* Get Current video mode, text cols
+                             * and video page */
+    int86 (WN_V_INT, &inpreg, &outreg);
+
+    mvs->numtextcols = (short)outreg.h.ah;
+	mvs->mode        = (short)outreg.h.al;
+
+    if ((mvs->byte_char  = (short)utpeekw(uttofaru(0x40,0x85))) == 0)
+			mvs->byte_char = (mvs->mode == _TEXTMONO)? 14 : 8;
+
+    /* Define number of available colors */
+    if( monitor     == _MONO        ||
+        mvs->mode   == _TEXTMONO    ||
+        mvs->mode   == _ERESNOCOLOR  ) mvs->numcolors = 0;
+    else  {
+        switch (mvs->mode) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 13:            /* EGA graphics                 */
+            case 14:
+            case 16:
+			case 17:
+			case 18:
+                mvs->numcolors = 16;  /* CGA,EGA,VGA 40/80 col*/
+                break;
+            case 4:           /* CGA  medium-res graphics       */
+            case 5:           /* CGA  medium-res graphics       */
+                mvs->numcolors = 4;
+                break;
+            case 6:           /* CGA  high-res   graphics       */
+                mvs->numcolors = 2;
+                break;
+            case 8:           /* PCjr low-res    graphics       */
+            case 9:           /* PCjr medium-res graphics       */
+                mvs->numcolors = 16;  /* PCjr                       */
+                break;
+            case 10:              /* PCjr high-res   graphics     */
+                mvs->numcolors = 4;   /* PCjr                       */
+                break;
+			case 19:
+                mvs->numcolors = 256;  /* VGA 256-colors resolution  */
+                break;
+        }
+    }
+
+    switch (adapter)     {
+        case    _MDPA:
+        case    _CGA:
+        case    _MCGA:
+        case    _OCGA:
+        case    _HGC:
+
+        mvs->numtextrows = 25;
+
+        /* Define number of available pages */
+        switch (mvs->mode) {
+            case 0:
+            case 1:
+                mvs->numvideopages = 8;        /* Color/Graphics Adapter 40 col*/
+                break;
+            case 2:
+            case 3:
+                mvs->numvideopages = 4;        /* Color/Graphics Adapter 80 col*/
+                break;
+            case 4:           /* CGA  medium-res graphics     */
+            case 5:           /* CGA  medium-res graphics     */
+            case 6:           /* CGA  high-res   graphics     */
+            case 7:           /* Monochrome Adapter       */
+            case 8:           /* PCjr low-res    graphics     */
+            case 9:           /* PCjr medium-res graphics     */
+            case 10:              /* PCjr high-res   graphics     */
+                mvs->numvideopages = 1;
+                break;
+        }
+        break;
+        case    _EGA:
+        case    _OEGA:
+
+        /* Define number of available rows */
+        inpreg.x.ax = 0x1130;   /* Get EGA information              */
+        inpreg.h.bh = 0;        /* Return 1Fh pointer not hear used */
+        int86 (WN_V_INT, &inpreg, &outreg);
+
+        mvs->numtextrows = (short)outreg.h.dl + 1;
+
+        /* Define number of available pages */
+        switch (mvs->mode) {       /* Enhanced Graphics Adapter    */
+            case 0:
+            case 1:
+                if (mvs->numtextrows == 25)
+                    mvs->numvideopages = 8;
+                else              /* Presumable 43-line mode      */
+                    mvs->numvideopages = ((mvs->memory == 64) ? 4 : 8);
+                break;
+            case 2:
+            case 3:
+                if (mvs->numtextrows == 25)
+                    mvs->numvideopages = ((mvs->memory == 64) ? 4 : 8);
+                else              /* Presumable 43-line mode      */
+                    mvs->numvideopages = mvs->memory >> 5;
+                break;
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                mvs->numvideopages = 1;
+                break;
+            case 13:
+                mvs->numvideopages = mvs->memory >> 5;
+                break;
+            case 14:
+                mvs->numvideopages = mvs->memory >> 6;
+                break;
+            case 16:
+                mvs->numvideopages = (mvs->memory == 256) ? 2 : 1;
+                break;
+        }
+        break;
+
+        case    _VGA:
+        case    _OVGA:
+
+            /* Define number of available rows */
+            mvs->numtextrows = (short)Buf1[ 0x22 ];
+
+            /* Define number of available pages */
+            mvs->numvideopages = (short)Buf1[ 0x29 ];
+
+            /* Define number of available colors */
+            mvs->numcolors = (short)Buf1[ 0x27 ];
+
+            break;
+    }
+    return YES;
+}
+
+static bool cdecl  chk_VGA (int *monitor) {
+    /* EGA Miscellaneous Information */
+    int EMI = utpeekw (uttofaru (0x40, 0x88));
+
+    /* Equipment list                */
+   char EQP = utpeekb (uttofaru (0x40, 0x10));
+
+    if ((EMI & 0x100) != 0)    return (YES);
+    if ((EMI & 8) == 0)        EMI ^= 2;
+    if ((EQP & 0x30) != 0x30)  EMI ^= 2;
+    if ((EMI & 2) != 0) {
+        if( (EQP & 0x30) != 0x30 )  *monitor = _ANALOGCOLOR;
+        else                        *monitor = _ANALOGMONO;
+        return (YES);
+    }
+    *monitor    = _COLOR;
+    return (NO);
+}
+
+#pragma warn -par
+static bool cdecl  chk_Olivetti (int *adapter) {
+    return (NO);
+}
+
+static int hard_handler (int errval, int ax, int bp, int si) {
+    Err_Val = _DI;
+    Err_Disk = ax;
+    Err_Hard = YES;
+    return (3);       /* RET_FAIL */
+}
+#pragma warn +par
+
+
+
